@@ -93,3 +93,23 @@ Some people occasionally experience MongoDB connection errors when running the t
 - Check that it's running using `brew services list`
 
 If you have issues that are not resolved by these tips, please reach out to a coach and, once the issue is resolved, we can add a new tip!
+
+
+
+#!/bin/bash
+pkill -f "node" || true
+
+#!/bin/bash        → tells Linux: run this with bash
+pkill -f "node"   → find any process with "node" in the name and kill it
+|| true           → if nothing is running (first deploy), don't crash — just continue
+
+#!/bin/bash                  → run with bash
+cd /home/ec2-user/acebook   → go to where CodeDeploy put your files
+npm install                  → install everything in package.json
+
+#!/bin/bash                  → run with bash
+cd /home/ec2-user/acebook   → go to your app folder
+npm start &                  → start the app
+                               & means: run in background
+                               without & the script never finishes
+                               and CodeDeploy hangs forever

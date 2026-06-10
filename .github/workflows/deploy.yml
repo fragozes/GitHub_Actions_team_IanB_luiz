@@ -1,0 +1,72 @@
+# GitHub Actions CI/CD Pipeline
+# Runs on every push to main branch
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  deploy:
+    name: Test and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1 - Get the code onto the GitHub Actions machine
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2 - Install Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 23
+
+      # Step 3 - Start MongoDB for tests
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.11.0
+        with:
+          mongodb-version: '7.0'
+
+      # Step 4 - Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # Step 5 - Run linting
+      - name: Run linting
+        run: npm run lint
+
+      # Step 6 - Run unit tests
+      - name: Run unit tests
+        run: npm run test:unit
+
+      # Step 7 - Run integration tests
+      - name: Run integration tests
+        run: |
+          npm run start:test &
+          npm run test:integration
+
+      # Step 8 - Zip the code
+      - name: Package code
+        run: zip -r deployment-${{ github.sha }}.zip . -x "node_modules/*"
+
+      # Step 9 - Authenticate with AWS
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+
+      # Step 10 - Upload zip to S3
+      - name: Copy code to S3
+        run: aws s3 cp deployment-${{ github.sha }}.zip s3://luiz-s3-test/
+
+      # Step 11 - Tell CodeDeploy to deploy from S3
+      - name: Trigger CodeDeploy
+        run: |
+          aws deploy create-deployment \
+            --application-name luiz-codedeploy-app \
+            --deployment-group-name production \
+            --s3-location bucket=luiz-s3-test,key=deployment-${{ github.sha }}.zip,bundleType=zip
