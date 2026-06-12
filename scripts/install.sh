@@ -1,13 +1,12 @@
 #!/bin/bash
 
-REGION=$(aws configure get region)
-echo "Deploying in region: $REGION"
+# Set exact paths for node and npm installed via nvm
+export NVM_DIR="/home/ec2-user/.nvm"
+source $NVM_DIR/nvm.sh
+export PATH="/home/ec2-user/.nvm/versions/node/v23.11.1/bin:$PATH"
 
-if [ $REGION != "eu-west-2" ]
-then
-    echo "This is the wrong region, change before deployment"
-    exit 1
-fi
+echo "Node version: $(node --version)"
+echo "npm version: $(npm --version)"
 
 # Fix permissions so ec2-user can write
 sudo chown -R ec2-user:ec2-user /home/ec2-user/acebook
