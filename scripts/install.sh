@@ -9,7 +9,10 @@ then
     exit 1
 fi
 
-echo "Installing dependencies"
+# Fix permissions so ec2-user can write
+sudo chown -R ec2-user:ec2-user /home/ec2-user/acebook
+
+echo "Installing dependencies..."
 cd /home/ec2-user/acebook
 npm install
 echo "Dependencies installed."

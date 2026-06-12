@@ -1,6 +1,4 @@
 # GitHub Actions CI/CD Pipeline
-# Runs on every push to main branch
-
 name: CI/CD Pipeline
 
 on:

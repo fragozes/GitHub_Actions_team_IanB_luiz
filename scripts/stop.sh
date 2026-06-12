@@ -1,5 +1,5 @@
 #!/bin/bash
 
-echo "Stopping application"
-pkill -f "node" || true
+echo "Stopping application..."
+sudo pkill -f "node bin/www" || true
 echo "Application stopped."
